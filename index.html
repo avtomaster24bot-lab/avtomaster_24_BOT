@@ -511,6 +511,33 @@ footer a { color: var(--yellow); text-decoration: none; }
 <body>
 
 <!-- HERO -->
+
+<!-- ── АУДИО ПЛЕЕР ──────────────────────────────────────────────────────────── -->
+<audio id="bgMusic" loop preload="auto">
+  <source src="avtomaster24.mp3" type="audio/mpeg">
+</audio>
+
+<!-- Кнопка управления музыкой — фиксированная в углу -->
+<button id="musicBtn" onclick="toggleMusic()" title="Музыка" style="
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--yellow);
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  z-index: 9999;
+  transition: transform 0.2s, box-shadow 0.2s;
+" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+  🔇
+</button>
 <section class="hero">
   <div class="logo-badge">✦ AVTOMASTER24 ✦ КАЗАХСТАН</div>
   <div class="cartoon-car">🚗</div>
@@ -756,5 +783,60 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   });
 });
 </script>
+
+<script>
+// Аудио — автозапуск с кнопкой включения/выключения
+const audio = document.getElementById('bgMusic');
+const btn = document.getElementById('musicBtn');
+let playing = false;
+
+audio.volume = 0.35; // Тихо — фоновая
+
+function toggleMusic() {
+  if (playing) {
+    audio.pause();
+    btn.textContent = '🔇';
+    playing = false;
+  } else {
+    audio.play().then(() => {
+      btn.textContent = '🎵';
+      playing = true;
+    }).catch(() => {
+      btn.textContent = '🎵';
+    });
+  }
+}
+
+// Пробуем автозапуск после первого клика/скролла на странице
+function tryAutoplay() {
+  if (!playing) {
+    audio.play().then(() => {
+      btn.textContent = '🎵';
+      playing = true;
+    }).catch(() => {});
+  }
+  document.removeEventListener('click', tryAutoplay);
+  document.removeEventListener('scroll', tryAutoplay);
+  document.removeEventListener('touchstart', tryAutoplay);
+}
+
+// Браузеры блокируют автозапуск без взаимодействия пользователя
+// Запускаем при первом касании/клике/скролле
+document.addEventListener('click', tryAutoplay);
+document.addEventListener('scroll', tryAutoplay);
+document.addEventListener('touchstart', tryAutoplay);
+
+// Плавное нарастание громкости
+audio.addEventListener('play', () => {
+  let vol = 0;
+  audio.volume = 0;
+  const fade = setInterval(() => {
+    vol = Math.min(vol + 0.05, 0.35);
+    audio.volume = vol;
+    if (vol >= 0.35) clearInterval(fade);
+  }, 150);
+});
+</script>
+
 </body>
 </html>
